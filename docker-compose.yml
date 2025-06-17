@@ -1,0 +1,120 @@
+networks:
+  cassandra-net:
+    driver: bridge
+
+services:
+  cassandra1:
+    image: cassandra:latest
+    container_name: cassandra1
+    hostname: cassandra1
+    ports:
+      - "9042:9042"
+    networks:
+      - cassandra-net
+    environment:
+      - CASSANDRA_CLUSTER_NAME=TestCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra1
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=64M
+      # Increased timeouts for slower machines
+      - JVM_OPTS=-Dcassandra.write_request_timeout_in_ms=120000 -Dcassandra.cas_contention_timeout_in_ms=120000 -Dcassandra.request_timeout_in_ms=240000 -Dcassandra.range_request_timeout_in_ms=120000 -Dcassandra.read_request_timeout_in_ms=120000 -Dcassandra.concurrent_writes=64 -Dcassandra.concurrent_reads=64
+      # Further optimized for slow machines
+      - CASSANDRA_COMPACTION_THROUGHPUT_MB_PER_SEC=8
+      - CASSANDRA_CONCURRENT_COMPACTORS=1
+      - CASSANDRA_MEMTABLE_FLUSH_WRITERS=1
+      - CASSANDRA_CONCURRENT_MATERIALIZED_VIEW_WRITES=8
+      - CASSANDRA_MEMTABLE_ALLOCATION_TYPE=heap_buffers
+      - JVM_EXTRA_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=500 -XX:InitiatingHeapOccupancyPercent=70 -XX:+DisableExplicitGC -XX:+ParallelRefProcEnabled
+    volumes:
+      - cassandra1_data:/var/lib/cassandra
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local'"]
+      interval: 60s
+      timeout: 30s
+      retries: 10
+      start_period: 180s
+    
+  cassandra2:
+    image: cassandra:latest
+    container_name: cassandra2
+    hostname: cassandra2
+    ports:
+      - "9043:9042"
+    networks:
+      - cassandra-net
+    environment:
+      - CASSANDRA_CLUSTER_NAME=TestCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra1
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=64M
+      # Increased timeouts for slower machines
+      - JVM_OPTS=-Dcassandra.write_request_timeout_in_ms=120000 -Dcassandra.cas_contention_timeout_in_ms=120000 -Dcassandra.request_timeout_in_ms=240000 -Dcassandra.range_request_timeout_in_ms=120000 -Dcassandra.read_request_timeout_in_ms=120000 -Dcassandra.concurrent_writes=64 -Dcassandra.concurrent_reads=64
+      # Further optimized for slow machines
+      - CASSANDRA_COMPACTION_THROUGHPUT_MB_PER_SEC=8
+      - CASSANDRA_CONCURRENT_COMPACTORS=1
+      - CASSANDRA_MEMTABLE_FLUSH_WRITERS=1
+      - CASSANDRA_CONCURRENT_MATERIALIZED_VIEW_WRITES=8
+      - CASSANDRA_MEMTABLE_ALLOCATION_TYPE=heap_buffers
+      - JVM_EXTRA_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=500 -XX:InitiatingHeapOccupancyPercent=70 -XX:+DisableExplicitGC -XX:+ParallelRefProcEnabled
+    volumes:
+      - cassandra2_data:/var/lib/cassandra
+    depends_on:
+      cassandra1:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local'"]
+      interval: 60s
+      timeout: 30s
+      retries: 10
+      start_period: 180s
+    
+  cassandra3:
+    image: cassandra:latest
+    container_name: cassandra3
+    hostname: cassandra3
+    ports:
+      - "9044:9042"
+    networks:
+      - cassandra-net
+    environment:
+      - CASSANDRA_CLUSTER_NAME=TestCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra1
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=64M
+      # Increased timeouts for slower machines
+      - JVM_OPTS=-Dcassandra.write_request_timeout_in_ms=120000 -Dcassandra.cas_contention_timeout_in_ms=120000 -Dcassandra.request_timeout_in_ms=240000 -Dcassandra.range_request_timeout_in_ms=120000 -Dcassandra.read_request_timeout_in_ms=120000 -Dcassandra.concurrent_writes=64 -Dcassandra.concurrent_reads=64
+      # Further optimized for slow machines
+      - CASSANDRA_COMPACTION_THROUGHPUT_MB_PER_SEC=8
+      - CASSANDRA_CONCURRENT_COMPACTORS=1
+      - CASSANDRA_MEMTABLE_FLUSH_WRITERS=1
+      - CASSANDRA_CONCURRENT_MATERIALIZED_VIEW_WRITES=8
+      - CASSANDRA_MEMTABLE_ALLOCATION_TYPE=heap_buffers
+      - JVM_EXTRA_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=500 -XX:InitiatingHeapOccupancyPercent=70 -XX:+DisableExplicitGC -XX:+ParallelRefProcEnabled
+    volumes:
+      - cassandra3_data:/var/lib/cassandra
+    depends_on:
+      cassandra2:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local'"]
+      interval: 60s
+      timeout: 30s
+      retries: 10
+      start_period: 180s
+
+volumes:
+  cassandra1_data:
+  cassandra2_data:
+  cassandra3_data:
