@@ -18,6 +18,7 @@ There are also 3 stress tests:
   `docker-compose down`
 
 # Database schema
+```sql
 CREATE KEYSPACE reservation_system WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 2};
 USE reservation_system;
 
@@ -47,3 +48,4 @@ CREATE TABLE reservations (
     modification timestamp,
     PRIMARY KEY (movie_name, seat)
 );
+```
